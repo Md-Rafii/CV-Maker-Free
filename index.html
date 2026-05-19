@@ -76,7 +76,6 @@ body { font-family: 'Hind Siliguri', sans-serif; background: var(--bg); color: v
 .field-group input, .field-group textarea, .field-group select { padding: 8px 11px; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'Hind Siliguri', sans-serif; font-size: 0.88rem; color: var(--text-dark); transition: border-color 0.15s; background: white; resize: vertical; }
 .field-group input:focus, .field-group textarea:focus, .field-group select:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,106,78,0.1); }
 
-/* PHOTO */
 .photo-upload-area { display: flex; align-items: center; gap: 16px; background: white; border: 1.5px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 14px; }
 .photo-box { width: 85px; height: 105px; border-radius: 8px; border: 2px dashed var(--green); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; background: var(--green-light); flex-shrink: 0; }
 .photo-box img { width: 100%; height: 100%; object-fit: cover; }
@@ -97,12 +96,23 @@ body { font-family: 'Hind Siliguri', sans-serif; background: var(--bg); color: v
 .btn-add { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px; border: 1.5px dashed var(--green); border-radius: 8px; background: var(--green-light); color: var(--green); cursor: pointer; font-family: inherit; font-size: 0.88rem; font-weight: 600; justify-content: center; margin-top: 8px; transition: all 0.15s; }
 .btn-add:hover { background: var(--green); color: white; }
 
+/* PREVIEW PANEL */
 .preview-panel { background: #dde4ec; overflow-y: auto; padding: 1.4rem; max-height: calc(100vh - 155px); }
 .preview-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
 .preview-label { font-size: 0.78rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 1px; }
 .btn-print { background: var(--green); color: white; border: none; padding: 8px 18px; border-radius: 8px; font-family: inherit; font-size: 0.83rem; font-weight: 600; cursor: pointer; }
 .btn-print:hover { background: #005040; }
-.cv-wrapper { background: white; width: 100%; max-width: 680px; margin: 0 auto; box-shadow: 0 4px 30px rgba(0,0,0,0.18); min-height: 960px; border-radius: 4px; overflow: hidden; }
+
+/* CV WRAPPER — screen: scaled preview */
+.cv-wrapper {
+  background: white;
+  width: 210mm;
+  transform-origin: top left;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.18);
+  border-radius: 4px;
+  overflow: visible;
+  display: block;
+}
 
 /* CV COMMON */
 .cv-sec-title { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 9px; padding-bottom: 5px; border-bottom: 2px solid; }
@@ -142,20 +152,74 @@ body { font-family: 'Hind Siliguri', sans-serif; background: var(--bg); color: v
 .cv-ngo .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
 
 /* TECH */
-.cv-tech { display: flex; }
-.cv-tech .cv-sidebar { background: #0d47a1; color: white; width: 200px; flex-shrink: 0; min-height: 960px; padding: 24px 15px; }
+.cv-tech { display: flex; min-height: 100%; }
+.cv-tech .cv-sidebar { background: #0d47a1; color: white; width: 200px; flex-shrink: 0; padding: 24px 15px; }
 .cv-tech .cv-main { flex: 1; padding: 24px; }
 
 /* ACADEMIC */
 .cv-academic { font-family: 'Hind Siliguri', sans-serif; padding: 28px; }
 
+/* ===================== PRINT STYLES ===================== */
 @media print {
-  .navbar,.hero,.sidebar,.editor-panel,.preview-controls { display: none !important; }
-  .app-layout { grid-template-columns: 1fr; }
-  .main-area { grid-template-columns: 1fr; }
-  .preview-panel { padding: 0; background: white; max-height: none; overflow: visible; }
-  .cv-wrapper { box-shadow: none; max-width: 100%; border-radius: 0; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+
+  html, body { margin: 0; padding: 0; background: white; }
+
+  /* Hide everything except the CV */
+  .navbar, .hero, .sidebar, .editor-panel, .preview-panel, .preview-controls,
+  .app-layout > .sidebar, .main-area > .editor-panel { display: none !important; }
+
+  .app-layout { display: block !important; }
+  .main-area { display: block !important; }
+
+  .preview-panel {
+    display: block !important;
+    padding: 0 !important;
+    background: white !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* CV wrapper: exact A4, no scaling, no shadows */
+  .cv-wrapper {
+    width: 210mm !important;
+    transform: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Page size and margins */
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  /* Allow content to flow across pages */
+  .cv-classic, .cv-modern, .cv-ngo, .cv-academic { page-break-inside: auto; }
+  .cv-tech { display: flex !important; page-break-inside: auto; }
+
+  /* Avoid breaking inside individual blocks */
+  .cv-sec-block { page-break-inside: avoid; break-inside: avoid; }
+  .repeat-item { page-break-inside: avoid; break-inside: avoid; }
+  .cv-item-name, .cv-item-sub, .cv-item-date, .cv-item-desc { page-break-inside: avoid; break-inside: avoid; }
+
+  /* Two-column layouts: keep columns from creating page issues */
+  .cv-classic .cv-body { display: grid !important; grid-template-columns: 210px 1fr !important; }
+  .cv-modern .cv-body { display: grid !important; grid-template-columns: 1fr 2fr !important; }
+  .cv-ngo .two-col { display: grid !important; grid-template-columns: 1fr 1fr !important; }
+
+  /* Tech sidebar: keep full height */
+  .cv-tech .cv-sidebar { min-height: 100% !important; }
+
+  /* Tables: avoid header row separation */
+  table { page-break-inside: auto; }
+  tr { page-break-inside: avoid; break-inside: avoid; }
+  thead { display: table-header-group; }
 }
+/* ====================================================== */
+
 @media (max-width:1100px) {
   .app-layout { grid-template-columns: 1fr; }
   .main-area { grid-template-columns: 1fr; }
@@ -215,8 +279,6 @@ body { font-family: 'Hind Siliguri', sans-serif; background: var(--bg); color: v
       <!-- PERSONAL -->
       <div class="editor-section active" id="sec-personal">
         <div class="section-header">👤 <span id="sh-p">ব্যক্তিগত তথ্য</span></div>
-
-        <!-- PHOTO UPLOAD -->
         <div class="photo-upload-area">
           <div class="photo-box" id="photo-preview" onclick="document.getElementById('photo-file').click()">
             <span class="up-icon">📷</span>
@@ -312,7 +374,9 @@ body { font-family: 'Hind Siliguri', sans-serif; background: var(--bg); color: v
         <span class="preview-label">👁️ <span id="lbl-prev">লাইভ প্রিভিউ</span></span>
         <button class="btn-print" onclick="window.print()">🖨️ <span id="lbl-prnt">প্রিন্ট / PDF</span></button>
       </div>
-      <div class="cv-wrapper" id="cv-preview"></div>
+      <div class="cv-outer" id="cv-outer">
+        <div class="cv-wrapper" id="cv-preview"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -347,6 +411,21 @@ let skills = [{name:'Python / Django',level:90},{name:'JavaScript / React',level
 let courses = [{name:'AWS Certified Developer',org:'Amazon Web Services',year:'২০২১'}];
 let refs = [{name:'প্রফেসর ড. আলী হাসান',title:'বিভাগীয় প্রধান, বুয়েট',phone:'+880 1700-111222',email:'ali@buet.ac.bd'}];
 
+// ===== SCALE PREVIEW =====
+function scalePreview() {
+  const outer = document.getElementById('cv-outer');
+  const wrapper = document.getElementById('cv-preview');
+  if (!outer || !wrapper) return;
+  const availW = outer.clientWidth - 0;
+  const cvW = 794; // 210mm at 96dpi
+  const scale = Math.min(1, availW / cvW);
+  wrapper.style.transform = `scale(${scale})`;
+  wrapper.style.transformOrigin = 'top left';
+  wrapper.style.width = cvW + 'px';
+  outer.style.height = (wrapper.scrollHeight * scale) + 'px';
+}
+window.addEventListener('resize', scalePreview);
+
 // ===== TRANSLATIONS =====
 const T = {
   bn:{
@@ -365,7 +444,6 @@ const T = {
     lbl_vol:'স্বেচ্ছাসেবী কার্যক্রম', lbl_hob:'শখ ও আগ্রহ',
     add_edu:'নতুন শিক্ষা যোগ করুন', add_exp:'নতুন অভিজ্ঞতা যোগ করুন', add_skill:'নতুন দক্ষতা যোগ করুন', add_course:'নতুন কোর্স যোগ করুন', add_ref:'রেফারেন্স যোগ করুন',
     lbl_prev:'লাইভ প্রিভিউ', lbl_prnt:'প্রিন্ট / PDF',
-    // CV labels
     cv_pers:'ব্যক্তিগত তথ্য', cv_obj:'উদ্দেশ্য / Objective', cv_edu:'শিক্ষাগত যোগ্যতা', cv_exp:'কর্ম অভিজ্ঞতা',
     cv_skill:'দক্ষতা', cv_lang:'ভাষা', cv_hob:'শখ', cv_course:'কোর্স/সনদ', cv_awd:'সম্মাননা ও পুরস্কার',
     cv_vol:'স্বেচ্ছাসেবী কার্যক্রম', cv_ref:'রেফারেন্স',
@@ -486,7 +564,6 @@ function sync() {
   renderCV();
 }
 
-// ===== PHOTO HELPERS =====
 function photoImg(w,h,r,extra) {
   return photo ? `<img src="${photo}" style="width:${w}px;height:${h}px;object-fit:cover;border-radius:${r};${extra||''}" alt="photo">` : '';
 }
@@ -724,6 +801,7 @@ function renderCV() {
   }
 
   el.innerHTML = html;
+  setTimeout(scalePreview, 50);
 }
 
 // ===== LISTS =====
@@ -812,6 +890,7 @@ function renderRefList() {
   Object.keys(d).forEach(id => { const el=document.getElementById(id); if(el) el.value=d[id]; });
   renderEduList(); renderExpList(); renderSkillList(); renderCourseList(); renderRefList();
   renderCV();
+  setTimeout(scalePreview, 100);
 })();
 </script>
 </body>
